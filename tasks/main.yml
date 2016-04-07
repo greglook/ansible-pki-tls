@@ -6,8 +6,6 @@
     owner: root
     group: wheel
     mode: '0755'
-  tags:
-    - pki
 
 - name: Create keys directory
   file:
@@ -16,8 +14,6 @@
     owner: root
     group: wheel
     mode: '0750'
-  tags:
-    - pki
 
 - name: Install Root CA
   copy:
@@ -28,10 +24,6 @@
     mode: '0644'
   register: root_ca
   # TODO: update system trusted certs somehow
-  tags:
-    - pki
-
-# TODO: mark root CA as trusted
 
 - name: Install Intermediate CA
   copy:
@@ -41,8 +33,6 @@
     group: wheel
     mode: '0644'
   register: intermediate_ca
-  tags:
-    - pki
 
 - name: Install server certificate
   copy:
@@ -52,8 +42,6 @@
     group: wheel
     mode: '0644'
   register: server_cert
-  tags:
-    - pki
 
 - name: Install server key
   copy:
@@ -63,8 +51,6 @@
     group: "{{ pki_key_group }}"
     mode: "{{ pki_key_mode }}"
   register: server_key
-  tags:
-    - pki
 
 - block:
     - name: Check certificate chain
@@ -75,8 +61,6 @@
       shell: "cat {{ pki_cert_path }} {{ pki_intermediate_ca_path }} > {{ pki_chained_cert_path }}"
       when: not chain_cert.stat.exists or server_cert.changed or intermediate_ca.changed
   when: create_chained_cert
-  tags:
-    - pki
 
 - block:
     - name: Check PEM key
@@ -93,5 +77,3 @@
         group: "{{ pki_key_group }}"
         mode: "{{ pki_key_mode }}"
   when: create_pem_key
-  tags:
-    - pki
