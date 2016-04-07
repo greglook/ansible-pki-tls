@@ -1,0 +1,5 @@
+---
+pki_root_ca_path: "{{ pki_certs_dir }}/{{ pki_root_ca }}"
+pki_intermediate_ca_path: "{{ pki_certs_dir }}/{{ pki_intermediate_ca }}"
+pki_cert_path: "{{ pki_certs_dir }}/{{ pki_cert_name }}.crt"
+pki_chained_cert_path: "{{ pki_certs_dir }}/{{ pki_cert_name }}_chained.crt"

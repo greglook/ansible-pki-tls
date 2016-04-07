@@ -1,0 +1,97 @@
+---
+- name: Create certificate directory
+  file:
+    name: "{{ pki_certs_dir }}"
+    state: directory
+    owner: root
+    group: wheel
+    mode: '0755'
+  tags:
+    - pki
+
+- name: Create keys directory
+  file:
+    name: "{{ pki_private_dir }}"
+    state: directory
+    owner: root
+    group: wheel
+    mode: '0750'
+  tags:
+    - pki
+
+- name: Install Root CA
+  copy:
+    src: "private/{{ pki_root_ca }}"
+    dest: "{{ pki_root_ca_path }}"
+    owner: root
+    group: wheel
+    mode: '0644'
+  register: root_ca
+  # TODO: update system trusted certs somehow
+  tags:
+    - pki
+
+# TODO: mark root CA as trusted
+
+- name: Install Intermediate CA
+  copy:
+    src: "private/{{ pki_intermediate_ca }}"
+    dest: "{{ pki_intermediate_ca_path }}"
+    owner: root
+    group: wheel
+    mode: '0644'
+  register: intermediate_ca
+  tags:
+    - pki
+
+- name: Install server certificate
+  copy:
+    src: "private/{{ pki_cert_name }}.crt"
+    dest: "{{ pki_cert_path }}"
+    owner: root
+    group: wheel
+    mode: '0644'
+  register: server_cert
+  tags:
+    - pki
+
+- name: Install server key
+  copy:
+    src: "private/{{ pki_cert_name }}.key"
+    dest: "{{ pki_key_path }}"
+    owner: "{{ pki_key_owner }}"
+    group: "{{ pki_key_group }}"
+    mode: "{{ pki_key_mode }}"
+  register: server_key
+  tags:
+    - pki
+
+- block:
+    - name: Check certificate chain
+      stat:
+        path: "{{ pki_chained_cert_path }}"
+      register: chain_cert
+    - name: Combine certificate chain
+      shell: "cat {{ pki_cert_path }} {{ pki_intermediate_ca_path }} > {{ pki_chained_cert_path }}"
+      when: not chain_cert.stat.exists or server_cert.changed or intermediate_ca.changed
+  when: create_chained_cert
+  tags:
+    - pki
+
+- block:
+    - name: Check PEM key
+      stat:
+        path: "{{ pki_pem_path }}"
+      register: pem_key
+    - name: Combine PEM key
+      shell: "cat {{ pki_cert_path }} {{ pki_intermediate_ca_path }} {{ pki_key_path }} > {{ pki_pem_path }}"
+      when: not pem_key.stat.exists or intermediate_ca.changed or server_cert.changed or server_key.changed
+    - name: Set PEM permissions
+      file:
+        path: "{{ pki_pem_path }}"
+        owner: "{{ pki_key_owner }}"
+        group: "{{ pki_key_group }}"
+        mode: "{{ pki_key_mode }}"
+  when: create_pem_key
+  tags:
+    - pki

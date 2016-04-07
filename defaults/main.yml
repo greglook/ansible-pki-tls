@@ -1,0 +1,58 @@
+---
+pki_root_ca: root-ca.crt
+pki_intermediate_ca: intermediate-ca.crt
+pki_cert_name: "{{ server_name | default(ansible_fqdn) }}"
+
+pki_certs_dir: /etc/ssl/certs
+pki_private_dir: /etc/ssl/private
+pki_key_path: "{{ pki_private_dir }}/{{ pki_cert_name }}.key"
+pki_pem_path: "{{ pki_private_dir }}/{{ pki_cert_name }}.pem"
+
+pki_key_owner: root
+pki_key_group: wheel
+pki_key_mode: '0640'
+
+create_chained_cert: false
+create_pem_key: false
+
+tls_protocols:
+  - TLSv1
+  - TLSv1.1
+  - TLSv1.2
+
+tls_ciphers:
+  - ECDHE-RSA-AES128-GCM-SHA256
+  - ECDHE-ECDSA-AES128-GCM-SHA256
+  - ECDHE-RSA-AES256-GCM-SHA384
+  - ECDHE-ECDSA-AES256-GCM-SHA384
+  - DHE-RSA-AES128-GCM-SHA256
+  - DHE-DSS-AES128-GCM-SHA256
+  - kEDH+AESGCM
+  - ECDHE-RSA-AES128-SHA256
+  - ECDHE-ECDSA-AES128-SHA256
+  - ECDHE-RSA-AES128-SHA
+  - ECDHE-ECDSA-AES128-SHA
+  - ECDHE-RSA-AES256-SHA384
+  - ECDHE-ECDSA-AES256-SHA384
+  - ECDHE-RSA-AES256-SHA
+  - ECDHE-ECDSA-AES256-SHA
+  - DHE-RSA-AES128-SHA256
+  - DHE-RSA-AES128-SHA
+  - DHE-DSS-AES128-SHA256
+  - DHE-RSA-AES256-SHA256
+  - DHE-DSS-AES256-SHA
+  - DHE-RSA-AES256-SHA
+  - AES128-GCM-SHA256
+  - AES256-GCM-SHA384
+  - AES128
+  - AES256
+  - AES
+  - DES-CBC3-SHA
+  - HIGH
+  - '!aNULL'
+  - '!eNULL'
+  - '!EXPORT'
+  - '!DES'
+  - '!RC4'
+  - '!MD5'
+  - '!PSK'
